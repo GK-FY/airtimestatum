@@ -21,7 +21,7 @@
   <div id="status" class="status">Status: <span id="st">unknown</span></div>
   <div class="hint">Scan with WhatsApp → Linked devices → Link a device</div>
   <div style="margin-top:14px">
-    <a class="button" id="adminLink" href="/admin?token=YOUR_ADMIN_UI_TOKEN">Open Admin UI</a>
+    <a class="button" id="adminLink" href="#" onclick="openAdmin(); return false;">Open Admin UI</a>
   </div>
 </div>
 
@@ -34,6 +34,13 @@
     else { qrDiv.innerText='No QR available'; }
   });
   socket.on('status', data => { if(!data) return; if(data.connected){ st.innerText='Connected'; qrDiv.innerHTML='<div style=\"font-size:48px\">✅</div>'; } else { st.innerText='Disconnected'; } });
+  
+  function openAdmin() {
+    const token = prompt('Enter admin token:');
+    if(token) {
+      window.location.href = '/admin?token=' + encodeURIComponent(token);
+    }
+  }
 </script>
 </body>
 </html>
