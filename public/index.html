@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>FY Bot — WhatsApp QR Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+    .subtitle {
+      color: #718096;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .qr-container {
+      width: 280px;
+      height: 280px;
+      margin: 0 auto 20px;
+      background: #f7fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      border: 3px dashed #e2e8f0;
+      position: relative;
+      overflow: hidden;
+    }
+    .qr-container img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .status {
+      margin: 20px 0;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .status.connected {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+    .status.disconnected {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+    .status.waiting {
+      background: #feebc8;
+      color: #7c2d12;
+    }
+    .hint {
+      color: #718096;
+      font-size: 13px;
+      margin: 15px 0;
+      line-height: 1.6;
+    }
+    .button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+      font-size: 16px;
+    }
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    .loading {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .icon {
+      font-size: 64px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎯 FY Bot</h1>
+    <p class="subtitle">WhatsApp Airtime Bot Dashboard</p>
+    
+    <div class="qr-container" id="qrContainer">
+      <div class="loading"></div>
+    </div>
+    
+    <div id="status" class="status waiting">
+      <span id="statusText">⏳ Waiting for QR code...</span>
+    </div>
+    
+    <div class="hint" id="hint">
+      Open WhatsApp → Settings → Linked Devices → Link a Device
+    </div>
+    
+    <button class="button" onclick="openAdminPanel()">
+      🔐 Admin Dashboard
+    </button>
+  </div>
+
+  <script>
+    const socket = io();
+    const qrContainer = document.getElementById('qrContainer');
+    const status = document.getElementById('status');
+    const statusText = document.getElementById('statusText');
+    const hint = document.getElementById('hint');
+
+    socket.on('qr', data => {
+      if (data && data.url) {
+        qrContainer.innerHTML = '<img src="' + data.url + '" alt="QR Code">';
+        status.className = 'status waiting';
+        statusText.textContent = '📱 Scan the QR code';
+        hint.textContent = 'Open WhatsApp → Settings → Linked Devices → Link a Device';
+      } else {
+        qrContainer.innerHTML = '<div class="loading"></div>';
+        statusText.textContent = '⏳ Generating QR code...';
+      }
+    });
+
+    socket.on('status', data => {
+      if (!data) return;
+      
+      if (data.connected) {
+        qrContainer.innerHTML = '<div class="icon">✅</div>';
+        status.className = 'status connected';
+        statusText.textContent = '✅ WhatsApp Connected!';
+        hint.textContent = 'Your bot is now online and ready to receive messages';
+      } else {
+        qrContainer.innerHTML = '<div class="loading"></div>';
+        status.className = 'status disconnected';
+        statusText.textContent = '❌ Disconnected';
+        hint.textContent = 'Waiting for QR code to reconnect...';
+      }
+    });
+
+    function openAdminPanel() {
+      const token = prompt('Enter your admin token:');
+      if (token && token.trim()) {
+        window.location.href = '/admin?token=' + encodeURIComponent(token.trim());
+      } else if (token !== null) {
+        alert('Admin token is required to access the dashboard');
+      }
+    }
+
+    // Add connection status monitoring
+    socket.on('connect', () => {
+      console.log('Socket connected');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+      status.className = 'status disconnected';
+      statusText.textContent = '⚠️ Connection lost';
+    });
+  </script>
+</body>
+</html>
