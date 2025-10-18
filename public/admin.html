@@ -1,0 +1,559 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>FY Bot — Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #2d3748;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #fff;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .tab-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .tab-btn.active {
+      background: #fff;
+      color: #667eea;
+      border-color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .card {
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    input, select, textarea {
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    .btn-secondary {
+      background: #f7fafc;
+      color: #4a5568;
+      border: 2px solid #e2e8f0;
+    }
+    .btn-secondary:hover {
+      background: #edf2f7;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 14px;
+    }
+    th {
+      background: #f7fafc;
+      color: #667eea;
+      font-weight: 600;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-paid {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+    .status-pending {
+      background: #feebc8;
+      color: #7c2d12;
+    }
+    .status-failed {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 250px;
+    }
+    .alert {
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .alert-success {
+      background: #c6f6d5;
+      color: #22543d;
+      border-left: 4px solid #38a169;
+    }
+    .alert-error {
+      background: #fed7d7;
+      color: #742a2a;
+      border-left: 4px solid #e53e3e;
+    }
+    .section-divider {
+      margin: 30px 0;
+      border: 0;
+      border-top: 2px solid #e2e8f0;
+    }
+    .info-box {
+      background: #ebf8ff;
+      border-left: 4px solid #3182ce;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .info-box p {
+      margin: 0;
+      color: #2c5282;
+      font-size: 14px;
+    }
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .tabs {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 FY Bot Admin Dashboard</h1>
+    
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('orders')">📦 Orders</button>
+      <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+      <button class="tab-btn" onclick="switchTab('system')">🔧 System</button>
+    </div>
+
+    <!-- Orders Tab -->
+    <div id="tab-orders" class="tab-content active">
+      <div class="card">
+        <h2>📋 Order Management</h2>
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Search by order number, MPesa code, or phone number...">
+          <select id="filterSelect">
+            <option value="all">All Orders</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Failed/Cancelled</option>
+          </select>
+          <button class="btn btn-primary" onclick="loadOrders()">🔍 Search</button>
+          <button class="btn btn-secondary" onclick="loadOrders()">🔄 Refresh</button>
+        </div>
+        <div id="ordersContainer">Loading orders...</div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="tab-settings" class="tab-content">
+      <div id="settingsAlert"></div>
+      
+      <div class="card">
+        <h2>👤 Admin Configuration</h2>
+        <div class="info-box">
+          <p><strong>Note:</strong> Admin WhatsApp number must be in format: 254XXXXXXXXX (Kenyan number)</p>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="admin_whatsapp">Admin WhatsApp Number</label>
+            <input type="text" id="admin_whatsapp" placeholder="254712345678">
+          </div>
+          <div class="form-group">
+            <label for="bot_name">Bot Name</label>
+            <input type="text" id="bot_name" placeholder="FY Bot">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>💰 Pricing & Limits</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="min_amount">Minimum Amount (KES)</label>
+            <input type="number" id="min_amount" placeholder="10" min="1">
+          </div>
+          <div class="form-group">
+            <label for="max_amount">Maximum Amount (KES)</label>
+            <input type="number" id="max_amount" placeholder="1500" min="1">
+          </div>
+          <div class="form-group">
+            <label for="discount_percent">Discount Percentage (%)</label>
+            <input type="number" id="discount_percent" placeholder="0" min="0" max="100" step="0.1">
+          </div>
+          <div class="form-group">
+            <label for="payment_poll_seconds">Payment Poll Timeout (seconds)</label>
+            <input type="number" id="payment_poll_seconds" placeholder="20" min="5">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🔐 Shadow Pay Configuration</h2>
+        <div class="info-box">
+          <p><strong>Shadow Pay</strong> is used for M-Pesa STK Push payments</p>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="shadow_api_key">Shadow Pay API Key</label>
+            <input type="text" id="shadow_api_key" placeholder="Your Shadow Pay API Key">
+          </div>
+          <div class="form-group">
+            <label for="shadow_api_secret">Shadow Pay API Secret</label>
+            <input type="password" id="shadow_api_secret" placeholder="Your Shadow Pay API Secret">
+          </div>
+          <div class="form-group">
+            <label for="shadow_account_id">Shadow Pay Account ID</label>
+            <input type="text" id="shadow_account_id" placeholder="17">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📡 Statum Airtime API Configuration</h2>
+        <div class="info-box">
+          <p><strong>Statum</strong> is used for airtime delivery to recipient numbers</p>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="statum_consumer_key">Statum Consumer Key</label>
+            <input type="text" id="statum_consumer_key" placeholder="Your Statum Consumer Key">
+          </div>
+          <div class="form-group">
+            <label for="statum_consumer_secret">Statum Consumer Secret</label>
+            <input type="password" id="statum_consumer_secret" placeholder="Your Statum Consumer Secret">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <button class="btn btn-primary" onclick="saveAllSettings()">💾 Save All Settings</button>
+      </div>
+    </div>
+
+    <!-- System Tab -->
+    <div id="tab-system" class="tab-content">
+      <div class="card">
+        <h2>🔧 System Information</h2>
+        <div id="systemInfo">Loading system information...</div>
+      </div>
+      
+      <div class="card">
+        <h2>🚀 Deployment Options</h2>
+        <div class="info-box">
+          <p><strong>Important:</strong> This WhatsApp bot requires a long-running server with persistent connections. It cannot run on serverless platforms like Vercel.</p>
+        </div>
+        <h3 style="margin: 20px 0 10px 0; color: #4a5568;">Recommended Platforms:</h3>
+        <ul style="margin-left: 20px; color: #4a5568; line-height: 1.8;">
+          <li><strong>Railway.app</strong> - Free tier available, easy deployment</li>
+          <li><strong>Render.com</strong> - Free tier available, automatic deployments</li>
+          <li><strong>Heroku</strong> - Reliable, paid plans</li>
+          <li><strong>DigitalOcean</strong> - Full control, $5/month droplets</li>
+          <li><strong>Replit</strong> - Current platform, easy to use</li>
+        </ul>
+        <h3 style="margin: 20px 0 10px 0; color: #4a5568;">Why not Vercel?</h3>
+        <p style="color: #718096; line-height: 1.6;">
+          Vercel is designed for serverless functions that run on-demand and terminate after each request. 
+          This WhatsApp bot uses <code>whatsapp-web.js</code> which requires:
+        </p>
+        <ul style="margin-left: 20px; color: #718096; line-height: 1.8; margin-top: 10px;">
+          <li>A persistent browser session (Puppeteer/Chromium)</li>
+          <li>WebSocket connections that stay open 24/7</li>
+          <li>File system access for session storage</li>
+          <li>Long-running processes (not request-response)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token') || '';
+
+    if (!token) {
+      alert('No admin token provided. Redirecting...');
+      window.location.href = '/';
+    }
+
+    function api(path, opts = {}) {
+      opts.headers = opts.headers || {};
+      opts.headers['x-admin-token'] = token;
+      return fetch(path, opts).then(r => r.json());
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
+      if (tabName === 'settings') loadSettings();
+      if (tabName === 'system') loadSystemInfo();
+      if (tabName === 'orders') loadOrders();
+    }
+
+    async function loadOrders() {
+      const search = document.getElementById('searchInput').value;
+      const filter = document.getElementById('filterSelect').value;
+      const container = document.getElementById('ordersContainer');
+      
+      container.innerHTML = 'Loading...';
+      
+      const result = await api(`/admin/orders?filter=${encodeURIComponent(filter)}&q=${encodeURIComponent(search)}`);
+      
+      if (!result.success) {
+        container.innerHTML = '<div class="alert alert-error">Error loading orders: ' + result.message + '</div>';
+        return;
+      }
+
+      if (!result.orders.length) {
+        container.innerHTML = '<p style="text-align: center; color: #a0aec0; padding: 40px;">No orders found</p>';
+        return;
+      }
+
+      let html = '<table><thead><tr>';
+      html += '<th>Order No</th><th>Payer</th><th>Recipient</th><th>Amount</th><th>Payable</th><th>Discount</th><th>Status</th><th>MPesa Code</th><th>Created</th><th>Actions</th>';
+      html += '</tr></thead><tbody>';
+
+      result.orders.forEach(order => {
+        const statusClass = order.status === 'paid' ? 'status-paid' : 
+                          order.status.includes('pending') ? 'status-pending' : 'status-failed';
+        html += '<tr>';
+        html += `<td><strong>${order.order_no}</strong></td>`;
+        html += `<td>${order.payer_number}</td>`;
+        html += `<td>${order.recipient_number}</td>`;
+        html += `<td>KES ${parseFloat(order.amount).toFixed(2)}</td>`;
+        html += `<td>KES ${parseFloat(order.amount_payable).toFixed(2)}</td>`;
+        html += `<td>${order.discount_percent}%</td>`;
+        html += `<td><span class="status-badge ${statusClass}">${order.status}</span></td>`;
+        html += `<td>${order.transaction_code || 'N/A'}</td>`;
+        html += `<td>${order.created_at}</td>`;
+        html += `<td><button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="viewOrderDetails('${order.order_no}')">View</button></td>`;
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    async function viewOrderDetails(orderNo) {
+      const result = await api(`/admin/order/${encodeURIComponent(orderNo)}`);
+      if (!result.success) {
+        alert('Error loading order details');
+        return;
+      }
+      const o = result.order;
+      alert(`📦 Order Details
+
+Order Number: ${o.order_no}
+Payer: ${o.payer_number}
+Recipient: ${o.recipient_number}
+Amount: KES ${parseFloat(o.amount).toFixed(2)}
+Payable Amount: KES ${parseFloat(o.amount_payable).toFixed(2)}
+Discount: ${o.discount_percent}%
+Status: ${o.status}
+MPesa Code: ${o.transaction_code || 'N/A'}
+Airtime Status: ${o.airtime_status || 'N/A'}
+Created: ${o.created_at}
+Updated: ${o.updated_at}`);
+    }
+
+    async function loadSettings() {
+      const result = await api('/admin/settings');
+      if (!result.success) {
+        showAlert('Error loading settings: ' + result.message, 'error');
+        return;
+      }
+
+      const s = result.settings;
+      const env = result.env || {};
+      
+      document.getElementById('admin_whatsapp').value = s.admin_whatsapp || env.admin_whatsapp || '';
+      document.getElementById('bot_name').value = s.bot_name || '';
+      document.getElementById('min_amount').value = s.min_amount || '';
+      document.getElementById('max_amount').value = s.max_amount || '';
+      document.getElementById('discount_percent').value = s.discount_percent || '';
+      document.getElementById('payment_poll_seconds').value = s.payment_poll_seconds || '';
+      document.getElementById('shadow_api_key').value = s.shadow_api_key || '';
+      document.getElementById('shadow_api_secret').value = s.shadow_api_secret || '';
+      document.getElementById('shadow_account_id').value = s.shadow_account_id || '';
+      document.getElementById('statum_consumer_key').value = s.statum_consumer_key || '';
+      document.getElementById('statum_consumer_secret').value = s.statum_consumer_secret || '';
+      
+      // Check if critical credentials are missing
+      if (!s.shadow_api_key || !s.shadow_api_secret || !s.statum_consumer_key || !s.statum_consumer_secret) {
+        showAlert('⚠️ Important: Please configure your API credentials (Shadow Pay and Statum) for the bot to process orders.', 'error');
+      }
+    }
+
+    async function saveAllSettings() {
+      const payload = {
+        admin_whatsapp: document.getElementById('admin_whatsapp').value,
+        bot_name: document.getElementById('bot_name').value,
+        min_amount: document.getElementById('min_amount').value,
+        max_amount: document.getElementById('max_amount').value,
+        discount_percent: document.getElementById('discount_percent').value,
+        payment_poll_seconds: document.getElementById('payment_poll_seconds').value,
+        shadow_api_key: document.getElementById('shadow_api_key').value,
+        shadow_api_secret: document.getElementById('shadow_api_secret').value,
+        shadow_account_id: document.getElementById('shadow_account_id').value,
+        statum_consumer_key: document.getElementById('statum_consumer_key').value,
+        statum_consumer_secret: document.getElementById('statum_consumer_secret').value
+      };
+
+      const result = await api('/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (result.success) {
+        showAlert('✅ Settings saved successfully! ' + (result.restart_required ? 'Please restart the bot for admin number changes to take effect.' : ''), 'success');
+      } else {
+        showAlert('❌ Error saving settings: ' + result.message, 'error');
+      }
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.getElementById('settingsAlert');
+      alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      setTimeout(() => { alertDiv.innerHTML = ''; }, 5000);
+    }
+
+    async function loadSystemInfo() {
+      const container = document.getElementById('systemInfo');
+      const result = await api('/admin/system-info');
+      
+      if (!result.success) {
+        container.innerHTML = '<p>Error loading system info</p>';
+        return;
+      }
+
+      const info = result.info;
+      container.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+          <div>
+            <strong>Platform:</strong> ${info.platform || 'Unknown'}
+          </div>
+          <div>
+            <strong>Node Version:</strong> ${info.nodeVersion || 'Unknown'}
+          </div>
+          <div>
+            <strong>Total Orders:</strong> ${info.totalOrders || 0}
+          </div>
+          <div>
+            <strong>WhatsApp Status:</strong> ${info.whatsappConnected ? '✅ Connected' : '❌ Disconnected'}
+          </div>
+        </div>
+      `;
+    }
+
+    // Load initial data
+    loadOrders();
+  </script>
+</body>
+</html>
